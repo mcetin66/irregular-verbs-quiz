@@ -39,7 +39,7 @@ export default function App() {
   const currentRank = gameState.player ? getCurrentRank(gameState.player) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-100 p-4 relative">
       <div className="container mx-auto max-w-6xl flex flex-col gap-8">
         {!gameState.isPlaying && !gameState.isGameOver && (
           <>
@@ -82,6 +82,12 @@ export default function App() {
           </>
         )}
       </div>
+  
+      {/* Footer Mesajı */}
+      <footer className="absolute bottom-0 left-0 w-full bg-gray-200 text-center p-2 text-sm text-gray-600">
+        Powered by <span className="font-semibold">Muhammed Bera Çetin</span> using Artificial Intelligence
+      </footer>
     </div>
   );
+  
 }

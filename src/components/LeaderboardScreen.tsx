@@ -119,6 +119,10 @@ export function LeaderboardScreen({ players, activePlayers, currentPlayer }: Lea
           );
         })}
       </div>
+      <div className="fixed bottom-4 right-4 bg-white bg-opacity-75 p-2 rounded-lg shadow text-xs text-gray-700">
+      Powered by <span className="font-semibold">Muhammed Bera Çetin</span> using Artificial Intelligence
     </div>
+    </div>
+    
   );
 }
