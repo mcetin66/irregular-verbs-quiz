@@ -1,6 +1,6 @@
 // Fetches UCL league-phase matches from football-data.org and computes
 // "strength of schedule" based on opponents' live results.
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const KEY = process.env.FOOTBALL_DATA_KEY || "proxy-injected";
 const SEASON = process.env.SEASON || "2026";
@@ -45,6 +45,15 @@ for (const t of teams.values()) {
     oppPPG: s.oppP ? +(s.oppPts / s.oppP).toFixed(3) : 0,
   });
   t.fixtures.sort((x, y) => x.md - y.md);
+}
+
+// Merge Elo ratings (from scripts/elo.mjs) if present
+let elo = {};
+try { elo = JSON.parse(readFileSync("data/elo.json", "utf8")); } catch {}
+for (const t of teams.values()) t.elo = elo[t.id]?.elo ?? null;
+for (const t of teams.values()) {
+  const e = t.fixtures.map((f) => teams.get(f.opp).elo).filter((x) => x);
+  t.oppElo = e.length === 8 ? Math.round(e.reduce((a, b) => a + b, 0) / 8) : null;
 }
 
 const list = [...teams.values()].sort((a, b) => b.oppPts - a.oppPts || b.oppGD - a.oppGD);

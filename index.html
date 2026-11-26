@@ -112,6 +112,7 @@ footer a{color:var(--acc2)}
   <div class="controls">
     <div class="seg" id="metric">
       <button data-m="oppPts" class="on">Rakip puanı</button>
+      <button data-m="oppElo">Rakip Elo</button>
       <button data-m="oppGF">Rakip golleri</button>
       <button data-m="oppGD">Rakip averajı</button>
     </div>
@@ -135,12 +136,12 @@ footer a{color:var(--acc2)}
   <div id="map" hidden></div>
 
   <footer>
-        Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
+        Elo: <a href="https://clubelo.com" target="_blank" rel="noopener">clubelo.com</a> · Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
   </footer>
 </div>
 
 <script>
-const M = {oppPts:"Rakip puanı",oppGF:"Rakip golleri",oppGD:"Rakip averajı"};
+const M = {oppPts:"Rakip puanı",oppElo:"Rakip Elo",oppGF:"Rakip golleri",oppGD:"Rakip averajı"};
 let D, byId, metric = "oppPts", sel = null, sortKey = "oppPts", sortDir = -1, q = "";
 const $ = s => document.querySelector(s);
 const sgn = n => n > 0 ? "+" + n : "" + n;
@@ -172,11 +173,11 @@ const QD = {
   br: ["Zorlanan", "Kötü gidiyor ama fikstür de ağır", "var(--gold)"],
   bl: ["Hayal kırıklığı", "Kolay rakiplere rağmen kötü gidiyor", "var(--loss)"],
 };
-let mapSel = null, scored = null;
+let mapSel = null, scored = null, basis = "pts";
 function score() {
   const T = D.teams.filter(t => t.p);
   const nz = (k) => { const v = T.map(k), a = Math.min(...v), b = Math.max(...v); return t => b === a ? 50 : (k(t) - a) / (b - a) * 100; };
-  const dN = nz(t => t.oppPPG), pN = nz(t => t.pts / t.p), gN = nz(t => (t.gf - t.ga) / t.p);
+  const dN = nz(t => basis === "elo" ? t.oppElo : t.oppPPG), pN = nz(t => t.pts / t.p), gN = nz(t => (t.gf - t.ga) / t.p);
   T.forEach(t => { t.diff = dN(t); t.perf = .7 * pN(t) + .3 * gN(t); t.raw = .75 * t.perf + .25 * t.diff; });
   const sN = nz(t => t.raw); T.forEach(t => t.succ = sN(t));
   const by = k => [...T].sort((a, b) => b[k] - a[k]);
@@ -208,6 +209,8 @@ function renderMap() {
   const t = byId[mapSel];
   $("#map").innerHTML = `
   <div class="card"><h2>Başarı haritası</h2>
+    <div class="controls"><span class="sub" style="margin:0">Fikstür zorluğu ölçüsü:</span><div class="seg" id="basis">
+      <button data-b="pts" class="${basis === "pts" ? "on" : ""}">Rakip puanı (sahada)</button><button data-b="elo" class="${basis === "elo" ? "on" : ""}">Rakip Elo (kâğıt üstünde)</button></div></div>
     <div class="sub" style="margin:-6px 0 10px">Sağa gittikçe fikstür zorlaşıyor, yukarı çıktıkça takım daha iyi oynuyor. İki değer de 0–100 arası. Bir armaya dokunun.</div>
     <div class="mapgrid">
       <div class="svgwrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Fikstür zorluğu ve performans grafiği">
@@ -237,13 +240,14 @@ function renderMap() {
     ${hl("Fikstürle şişenler", "Fikstür hesaba katılınca en çok düşenler", [...T].sort((a, b) => (a.rank - a.succRank) - (b.rank - b.succRank)).slice(0, 5), t => `▼ ${t.succRank - t.rank}`, "var(--loss)")}
   </div>
   <div class="card tablewrap"><h2>Fikstüre göre başarı sıralaması</h2>
-    <div class="sub" style="margin:-6px 0 10px">Başarı puanı = %75 kendi performansı + %25 fikstür zorluğu, 0–100 arası. Performans = %70 maç başı puan + %30 maç başı averaj.</div>
+    <div class="sub" style="margin:-6px 0 10px">Başarı puanı = %75 kendi performansı + %25 fikstür zorluğu, 0–100 arası. Performans = %70 maç başı puan + %30 maç başı averaj. Fikstür zorluğu, yukarıdaki seçime göre rakiplerin maç başı puanı ya da ortalama Elo puanı.</div>
     <table><thead><tr><th>#</th><th>Takım</th><th>Başarı</th><th></th><th>Performans</th><th>Fikstür</th><th>Lig</th><th>Fark</th></tr></thead><tbody>
     ${[...T].sort((a, b) => a.succRank - b.succRank).map(t => { const g = t.rank - t.succRank;
       return `<tr data-id="${t.id}"><td>${t.succRank}</td><td><span class="t">${img(t)}${t.name}</span></td><td><b>${Math.round(t.succ)}</b></td>
       <td style="min-width:110px"><div class="bar"><i class="a" style="width:${t.succ}%"></i></div></td><td>${Math.round(t.perf)}</td><td>${Math.round(t.diff)}</td><td>${t.rank}</td>
       <td style="color:${g > 0 ? "var(--win)" : g < 0 ? "var(--loss)" : "var(--mute)"}">${g > 0 ? "▲ " + g : g < 0 ? "▼ " + -g : "–"}</td></tr>`; }).join("")}
     </tbody></table></div>`;
+  document.querySelectorAll("#basis button").forEach(b => b.onclick = () => { basis = b.dataset.b; renderMap(); });
   document.querySelectorAll("#map [data-id]").forEach(e => e.onclick = () => { mapSel = +e.dataset.id; renderMap(); if (e.tagName !== "g") document.querySelector("#map svg").scrollIntoView({ behavior: "smooth", block: "center" }); });
 }
 const hl = (h, s, L, f, c) => `<div class="card q"><h2>${h}</h2><div class="sub">${s}</div>
@@ -258,7 +262,7 @@ function render() { bars(); detail(); table(); }
 
 function bars() {
   const list = [...D.teams].sort((a, b) => b[metric] - a[metric] || b.oppPts - a.oppPts);
-  const vals = list.map(t => t[metric]), mn = Math.min(0, ...vals), mx = Math.max(...vals, 0);
+  const vals = list.map(t => t[metric]), mn = metric === "oppElo" ? Math.min(...vals) - 40 : Math.min(0, ...vals), mx = Math.max(...vals, 0);
   const span = mx - mn || 1;
   $("#legend").innerHTML = `<span style="margin-left:auto">Rakip gol: <b style="color:var(--win)">A</b> : <b style="color:var(--loss)">Y</b></span>`;
   $("#bars").innerHTML = list.map((t, i) => {
@@ -284,33 +288,33 @@ function acc(t) {
   const pos = rows.findIndex(f => f.self) + 1;
   const fx = rows.map(f => {
     if (f.self) return `<tr class="me"><td class="rk">${t.rank}.</td><td><span class="t">${img(t)}${t.name}</span></td>
-      <td class="ha" colspan="2">Fikstüründe ${pos}. / 9</td><td><b>${t.pts}</b></td><td class="gf">${t.gf}</td><td class="ga">${t.ga}</td><td>${sgn(t.gf - t.ga)}</td></tr>`;
+      <td class="ha" colspan="2">Fikstüründe ${pos}. / 9</td><td>${t.elo ?? "–"}</td><td><b>${t.pts}</b></td><td class="gf">${t.gf}</td><td class="ga">${t.ga}</td><td>${sgn(t.gf - t.ga)}</td></tr>`;
     const o = byId[f.opp];
     const r = !f.done ? ["U", "Oynanmadı"] : f.gf > f.ga ? ["W", f.gf + "-" + f.ga] : f.gf === f.ga ? ["D", f.gf + "-" + f.ga] : ["L", f.gf + "-" + f.ga];
     return `<tr><td class="rk">${o.rank}.</td><td><span class="t">${img(o)}${o.name}</span></td>
       <td class="ha">${f.home ? "İç" : "Dış"} · H${f.md}</td><td><span class="res ${r[0]}">${r[1]}</span></td>
-      <td><b>${o.pts}</b></td><td class="gf">${o.gf}</td><td class="ga">${o.ga}</td><td>${sgn(o.gf - o.ga)}</td></tr>`;
+      <td>${o.elo ?? "–"}</td><td><b>${o.pts}</b></td><td class="gf">${o.gf}</td><td class="ga">${o.ga}</td><td>${sgn(o.gf - o.ga)}</td></tr>`;
   }).join("");
   return `<div class="acc">
     <div class="accsum">${t.name}: lig sırası <b>${t.rank}.</b> · ${t.pts} puan · ${t.w}G ${t.d}B ${t.l}M ·
       rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan · kendi fikstüründe <b>${pos}. / 9</b></div>
     <div class="bands">${dist(t).map((n, i) => `<span class="band"><small>${BANDS[i][0]}-${BANDS[i][1]}. sıra</small><b>${n}</b></span>`).join("")}</div>
-    <div style="overflow-x:auto"><table class="acct"><thead><tr><th>Sıra</th><th>Rakip</th><th>Maç</th><th>Sonuç</th><th>Puan</th><th>A</th><th>Y</th><th>Av</th></tr></thead>
-    <tbody>${fx}</tbody><tfoot><tr><td></td><td>Toplam</td><td></td><td></td><td><b>${t.oppPts}</b></td><td class="gf">${t.oppGF}</td><td class="ga">${t.oppGA}</td><td>${sgn(t.oppGD)}</td></tr></tfoot></table></div></div>`;
+    <div style="overflow-x:auto"><table class="acct"><thead><tr><th>Sıra</th><th>Rakip</th><th>Maç</th><th>Sonuç</th><th>Elo</th><th>Puan</th><th>A</th><th>Y</th><th>Av</th></tr></thead>
+    <tbody>${fx}</tbody><tfoot><tr><td></td><td>Toplam</td><td></td><td></td><td title="Ortalama">ø ${t.oppElo ?? "–"}</td><td><b>${t.oppPts}</b></td><td class="gf">${t.oppGF}</td><td class="ga">${t.oppGA}</td><td>${sgn(t.oppGD)}</td></tr></tfoot></table></div></div>`;
 }
 function detail() {}
 
-const COLS = [["#", null], ["Takım", null], ["Lig", "rank"], ["P", "pts"], ["Rakip P", "oppPts"],
+const COLS = [["#", null], ["Takım", null], ["Lig", "rank"], ["P", "pts"], ["Elo", "elo"], ["Rakip P", "oppPts"], ["Rakip Elo", "oppElo"],
   ["Rakip MBP", "oppPPG"], ["1-8", null], ["9-16", null], ["17-24", null], ["25-36", null], ["Rakip A", "oppGF"], ["Rakip Y", "oppGA"], ["Rakip Av", "oppGD"]];
 function table() {
   const list = [...D.teams].sort((a, b) => sortDir * (a[sortKey] - b[sortKey]));
   const ext = k => { const v = D.teams.map(t => t[k]); return [Math.min(...v), Math.max(...v)]; };
-  const heat = {}; ["oppPts", "oppPPG", "oppGF", "oppGD"].forEach(k => heat[k] = ext(k));
+  const heat = {}; ["oppPts", "oppElo", "oppPPG", "oppGF", "oppGD"].forEach(k => heat[k] = ext(k));
   $("#th").innerHTML = "<tr>" + COLS.map(([n, k]) => `<th data-k="${k || ""}" class="${k === sortKey ? "on" : ""}">${n}${k === sortKey ? (sortDir < 0 ? " ▼" : " ▲") : ""}</th>`).join("") + "</tr>";
   $("#tb").innerHTML = list.filter(t => !q || t.name.toLowerCase().includes(q)).map((t, i) => {
     const c = k => { if (!heat[k]) return ""; const [a, b] = heat[k], x = (t[k] - a) / (b - a || 1); return `style="background:rgba(61,123,255,${(x * .55).toFixed(2)})"`; };
     return `<tr data-id="${t.id}"><td>${i + 1}</td><td><span class="t"><img class="crest" src="${t.crest}" alt="" onerror="this.style.visibility='hidden'">${t.name}</span></td>
-      <td>${t.rank}</td><td>${t.pts}</td><td><span class="heat" ${c("oppPts")}>${t.oppPts}</span></td><td><span class="heat" ${c("oppPPG")}>${t.oppPPG.toFixed(2)}</span></td>
+      <td>${t.rank}</td><td>${t.pts}</td><td>${t.elo ?? "–"}</td><td><span class="heat" ${c("oppPts")}>${t.oppPts}</span></td><td><span class="heat" ${c("oppElo")}>${t.oppElo ?? "–"}</span></td><td><span class="heat" ${c("oppPPG")}>${t.oppPPG.toFixed(2)}</span></td>
       ${dist(t).map((n, j) => `<td><span class="heat" style="background:rgba(61,123,255,${(n / 4 * .55).toFixed(2)})">${n}</span></td>`).join("")}
       <td><span class="heat" ${c("oppGF")}>${t.oppGF}</span></td><td>${t.oppGA}</td><td><span class="heat" ${c("oppGD")}>${sgn(t.oppGD)}</span></td></tr>`;
   }).join("");
