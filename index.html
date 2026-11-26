@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>UCL Rakip Gücü</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--bg:#070b1f;--panel:#0f1533;--panel2:#161e45;--line:#26306a;--text:#e9ecff;--mute:#8d96c7;
 --acc:#3d7bff;--acc2:#00d1ff;--gold:#ffc940;--win:#22c55e;--draw:#94a3b8;--loss:#ef4444}
@@ -92,6 +92,38 @@ tbody tr:hover{background:var(--panel2);cursor:pointer}
 .chip .crest{width:18px;height:18px}
 .hlrow{display:grid;grid-template-columns:24px minmax(0,1fr) auto 44px;gap:8px;align-items:center;padding:6px 4px;border-top:1px solid var(--line);cursor:pointer}
 .hlrow small{color:var(--mute)}.hlrow b{text-align:right}
+body{background-color:var(--bg);background-image:radial-gradient(1100px 520px at 75% -8%,rgba(46,80,220,.45),transparent 62%),radial-gradient(700px 400px at -5% 20%,rgba(0,170,255,.12),transparent 60%),
+radial-gradient(1.2px 1.2px at 12% 18%,rgba(255,255,255,.55),transparent 2px),radial-gradient(1px 1px at 68% 9%,rgba(255,255,255,.45),transparent 2px),radial-gradient(1.4px 1.4px at 88% 31%,rgba(255,255,255,.5),transparent 2px),radial-gradient(1px 1px at 33% 6%,rgba(255,255,255,.4),transparent 2px),radial-gradient(1px 1px at 52% 22%,rgba(255,255,255,.35),transparent 2px);background-repeat:no-repeat;background-attachment:fixed}
+h1,.card h2,.stat b,.tabs button,.hc .hl b,.hn,.hm th,.val{font-family:"Barlow Condensed",Inter,system-ui,sans-serif}
+h1{font-size:clamp(30px,5.2vw,52px);font-weight:800;text-transform:uppercase;letter-spacing:.01em;line-height:1}
+h1 span{background:linear-gradient(90deg,#fff 0%,var(--acc2) 45%,var(--acc) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.card h2{font-size:17px;font-weight:700;letter-spacing:.08em;color:#b9c3f2}
+.stat b{font-size:26px;font-weight:700}
+.tabs button{font-size:18px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.card{background:linear-gradient(180deg,rgba(20,28,70,.85),rgba(10,15,40,.9));backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05)}
+.val{font-size:17px}
+#hero{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:12px;margin-bottom:22px}
+@media(max-width:960px){#hero{grid-template-columns:repeat(2,minmax(0,1fr))}.hc.big{grid-column:1/-1}}
+.hc{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;min-width:0;
+background:linear-gradient(160deg,rgba(61,123,255,.22),rgba(15,21,51,.9) 60%);border:1px solid var(--line);transition:transform .15s,border-color .15s}
+.hc:hover,.hc:focus-visible{transform:translateY(-2px);border-color:var(--acc2)}
+.hc.big{background:linear-gradient(140deg,#2a49d8 0%,#1a2a78 55%,#0f1533 100%);border-color:#4d6dff}
+.hc .hl{display:flex;flex-direction:column}.hc .hl b{font-size:16px;text-transform:uppercase;letter-spacing:.05em}.hc .hl small{color:var(--mute);font-size:12px}
+.hc.big .hl small{color:#c3ceff}
+.hcb{display:flex;align-items:center;gap:10px;min-width:0}.hcb .crest{width:40px;height:40px}.hc.big .hcb .crest{width:56px;height:56px}
+.hn{font-size:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hc.big .hn{font-size:32px}
+.hf{color:var(--mute);font-size:13px}.hc.big .hf{color:#dce3ff}
+.scale{display:flex;align-items:center;gap:6px;margin-left:auto}.scale i{width:120px;height:10px;border-radius:5px;background:linear-gradient(90deg,hsl(220 85% 22%),hsl(110 85% 37%),hsl(0 85% 52%))}.scale small{color:var(--mute)}
+.hmwrap{overflow-x:auto}
+.hm{border-collapse:separate;border-spacing:4px;min-width:760px}
+.hm th,.hm td{border:0;padding:0;text-align:center}.hm th{font-size:15px;padding-bottom:4px}.hm th small{color:var(--gold);margin-left:2px}
+.hm .tl{text-align:left;padding-right:8px;white-space:nowrap}.hm .rk{color:var(--mute);width:22px;font-size:12px}
+.hm tbody tr{cursor:pointer}.hm tbody tr:hover .tl{color:var(--acc2)}
+.cell{height:40px;min-width:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:13px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);border-bottom:4px solid transparent}
+.cell .crest{width:20px;height:20px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
+.cell.W{border-bottom-color:var(--win)}.cell.D{border-bottom-color:var(--draw)}.cell.L{border-bottom-color:var(--loss)}
+.hm .sum{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:700;padding-left:8px}
+@media(prefers-reduced-motion:reduce){.hc{transition:none}}
 footer{color:var(--mute);font-size:12px;margin-top:22px}
 footer a{color:var(--acc2)}
 .err{padding:40px;text-align:center;color:var(--loss)}
@@ -107,7 +139,8 @@ footer a{color:var(--acc2)}
     <div class="stats" id="stats"></div>
   </header>
 
-  <nav class="tabs"><button data-t="list" class="on">Sıralama</button><button data-t="map">Başarı Haritası</button></nav>
+  <section id="hero" aria-label="Öne çıkanlar"></section>
+  <nav class="tabs"><button data-t="list" class="on">Sıralama</button><button data-t="map">Başarı Haritası</button><button data-t="heat">Isı Haritası</button></nav>
   <div id="tab-list">
   <div class="controls">
     <div class="seg" id="metric">
@@ -134,6 +167,7 @@ footer a{color:var(--acc2)}
 
   </div>
   <div id="map" hidden></div>
+  <div id="heat" hidden></div>
 
   <footer>
         Elo: <a href="https://clubelo.com" target="_blank" rel="noopener">clubelo.com</a> · Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
@@ -157,7 +191,8 @@ load().then(d => {
   render();
   document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => setTab(b.dataset.t));
   let tb = "list"; try { tb = localStorage.getItem("tab") || "list"; } catch (e) {}
-  if (tb === "map") setTab("map");
+  renderHero();
+  if (tb !== "list") setTab(tb);
 }).catch(e => { console.error(e); $("#tab-list").hidden = false; $("#tab-list").innerHTML = `<div class="err">Veri yüklenemedi (${e.name}: ${e.message}). Sayfayı yenileyin.</div>`; });
 
 document.querySelectorAll("#metric button").forEach(b => b.onclick = () => {
@@ -254,9 +289,50 @@ const hl = (h, s, L, f, c) => `<div class="card q"><h2>${h}</h2><div class="sub"
   ${L.map(t => `<div class="hlrow" data-id="${t.id}">${img(t)}<span class="nm">${t.name}</span><small>lig ${t.rank}. → ${t.succRank}.</small><b style="color:${c}">${f(t)}</b></div>`).join("")}</div>`;
 function setTab(k) {
   document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === k));
-  $("#tab-list").hidden = k !== "list"; $("#map").hidden = k !== "map";
+  $("#tab-list").hidden = k !== "list"; $("#map").hidden = k !== "map"; $("#heat").hidden = k !== "heat";
   if (k === "map") renderMap();
+  if (k === "heat") renderHeat();
   try { localStorage.setItem("tab", k); } catch (e) {}
+}
+// ---- Vitrin + Isı haritası ----
+let heatBy = "pts";
+function renderHero() {
+  const T = score();
+  const top = (k, dir = -1) => [...T].filter(t => t[k] != null).sort((a, b) => dir * (a[k] - b[k]))[0];
+  const surp = [...T].sort((a, b) => (b.rank - b.succRank) - (a.rank - a.succRank))[0];
+  const cards = [
+    ["En zor fikstür", "sahada", top("oppPts"), t => `Rakipleri ${t.oppPts} puan`],
+    ["En zor fikstür", "kâğıt üstünde", top("oppElo"), t => `Rakip Elo ort. ${t.oppElo}`],
+    ["En kolay fikstür", "sahada", top("oppPts", 1), t => `Rakipleri ${t.oppPts} puan`],
+    ["Fikstüre göre lider", "başarı puanı", T.find(t => t.succRank === 1), t => `Ligde ${t.rank}., fikstüre göre 1.`],
+    ["Puan tablosu haksızlık ediyor", "en çok yükselen", surp, t => `Lig ${t.rank}. → ${t.succRank}.`],
+  ];
+  $("#hero").innerHTML = cards.map(([h, s, t, f], i) => `<button class="hc ${i === 0 ? "big" : ""}" data-id="${t.id}">
+    <span class="hl"><b>${h}</b><small>${s}</small></span>
+    <span class="hcb">${img(t)}<span class="hn">${t.name}</span></span><span class="hf">${f(t)}</span></button>`).join("");
+  document.querySelectorAll("#hero .hc").forEach(b => b.onclick = () => { setTab("list"); sel = +b.dataset.id; render(); document.querySelector(".row.sel")?.scrollIntoView({ behavior: "smooth", block: "center" }); });
+}
+function renderHeat() {
+  const T = [...D.teams].sort((a, b) => heatBy === "elo" ? b.oppElo - a.oppElo : b.oppPts - a.oppPts);
+  const val = o => heatBy === "elo" ? o.elo : o.pts;
+  const all = D.teams.map(val), lo = Math.min(...all), hi = Math.max(...all);
+  const col = v => { const x = (v - lo) / (hi - lo || 1); return `hsl(${220 - x * 220} 85% ${22 + x * 30}%)`; };
+  const res = f => !f.done ? "" : f.gf > f.ga ? "W" : f.gf === f.ga ? "D" : "L";
+  $("#heat").innerHTML = `<div class="card">
+    <h2>Fikstür ısı haritası</h2>
+    <div class="controls"><span class="sub" style="margin:0">Hücre rengi:</span><div class="seg" id="heatby">
+      <button data-h="pts" class="${heatBy === "pts" ? "on" : ""}">Rakibin puanı</button><button data-h="elo" class="${heatBy === "elo" ? "on" : ""}">Rakibin Elo'su</button></div>
+      <span class="scale"><small>Zayıf</small><i></i><small>Güçlü</small></span></div>
+    <div class="sub" style="margin:-4px 0 12px">Her satır bir takımın 8 haftalık fikstürü. Kırmızıya döndükçe rakip güçleniyor. Alt çizgi sonucu gösteriyor: yeşil galibiyet, gri beraberlik, kırmızı mağlubiyet.</div>
+    <div class="hmwrap"><table class="hm"><thead><tr><th></th><th class="tl">Takım</th>${[1,2,3,4,5,6,7,8].map(m => `<th>H${m}${m <= D.matchday ? "" : "<small>•</small>"}</th>`).join("")}<th>${heatBy === "elo" ? "Ort." : "Top."}</th></tr></thead><tbody>
+    ${T.map((t, i) => `<tr data-id="${t.id}"><td class="rk">${i + 1}</td><td class="tl"><span class="t">${img(t)}${t.name}</span></td>
+      ${t.fixtures.map(f => { const o = byId[f.opp], v = val(o);
+        return `<td><div class="cell ${res(f)}" style="background:${col(v)}" title="H${f.md} ${f.home ? "İç" : "Dış"}: ${o.name} (${v})${f.done ? " " + f.gf + "-" + f.ga : ""}">
+          ${img(o)}<span>${v}</span></div></td>`; }).join("")}
+      <td class="sum">${heatBy === "elo" ? t.oppElo : t.oppPts}</td></tr>`).join("")}
+    </tbody></table></div></div>`;
+  document.querySelectorAll("#heatby button").forEach(b => b.onclick = () => { heatBy = b.dataset.h; renderHeat(); });
+  document.querySelectorAll("#heat tbody tr").forEach(r => r.onclick = () => { setTab("list"); sel = +r.dataset.id; render(); document.querySelector(".row.sel")?.scrollIntoView({ behavior: "smooth", block: "center" }); });
 }
 function render() { bars(); detail(); table(); }
 
