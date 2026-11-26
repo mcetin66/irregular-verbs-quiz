@@ -1,0 +1,23 @@
+name: Fetch Elo
+on:
+  push:
+    branches: [claude/focused-goldberg-nk4u84]
+    paths: [.github/workflows/elo.yml]
+  schedule: [{ cron: "47 5 * * *" }]
+  workflow_dispatch:
+permissions: { contents: write }
+jobs:
+  elo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data/elo
+          curl -sSf "http://api.clubelo.com/2026-08-28" -o data/elo/draw.csv
+          curl -sSf "http://api.clubelo.com/$(date -u +%F)" -o data/elo/now.csv
+          wc -l data/elo/*.csv
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data/elo
+          git diff --cached --quiet || (git commit -m "Update Elo data" && git push)
