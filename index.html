@@ -69,6 +69,29 @@ tbody tr:hover{background:var(--panel2);cursor:pointer}
 .acct tr.me td{background:rgba(61,123,255,.22);font-weight:700}.acct tr.me td:first-child{box-shadow:inset 3px 0 var(--acc2)}
 .acct tfoot td{border-bottom:0;font-weight:600}
 @media(max-width:600px){.card{padding:12px}.row{grid-template-columns:18px 20px minmax(0,1fr) auto 30px 10px;gap:6px;padding:6px 4px}.row .bar{display:none}.acc{margin-left:0}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mute);font:inherit;font-weight:600;font-size:15px;padding:10px 14px;cursor:pointer}
+.tabs button.on{color:var(--text);border-color:var(--acc2)}
+#map{display:grid;gap:18px}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:860px){.mapgrid{grid-template-columns:minmax(0,1fr)}}
+.svgwrap svg{width:100%;height:auto;display:block}
+.gl{stroke:var(--line);stroke-width:1}.mid{stroke:var(--mute);stroke-width:1.5;stroke-dasharray:5 5}
+.qbg{opacity:.06}.tk{fill:var(--mute);font-size:11px}.ax{fill:var(--mute);font-size:12px;font-weight:600}.ql{font-size:13px;font-weight:700;opacity:.9}
+.dot{cursor:pointer}.dot .halo{fill:var(--panel);stroke-width:2;opacity:.9}.dot.on .halo{stroke-width:3;fill:var(--panel2)}
+.dot:hover .halo{stroke-width:3}
+.info{background:var(--panel2);border-radius:12px;padding:14px;display:grid;gap:12px}
+.info .top{display:flex;gap:12px;align-items:center}.info .top img{width:48px;height:48px;object-fit:contain}.info h3{margin:0 0 4px;font-size:20px}
+.pill{border:1px solid;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+.meter .mh{display:flex;justify-content:space-between;margin-bottom:4px}.meter .mh b{font-size:18px}.meter small{color:var(--mute)}
+.cm{margin:0;line-height:1.5}
+.quads{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:18px}
+.q .sub{margin:-6px 0 10px;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:4px 10px 4px 5px;font:inherit;font-size:13px;cursor:pointer}
+.chip .crest{width:18px;height:18px}
+.hlrow{display:grid;grid-template-columns:24px minmax(0,1fr) auto 44px;gap:8px;align-items:center;padding:6px 4px;border-top:1px solid var(--line);cursor:pointer}
+.hlrow small{color:var(--mute)}.hlrow b{text-align:right}
 footer{color:var(--mute);font-size:12px;margin-top:22px}
 footer a{color:var(--acc2)}
 .err{padding:40px;text-align:center;color:var(--loss)}
@@ -84,6 +107,8 @@ footer a{color:var(--acc2)}
     <div class="stats" id="stats"></div>
   </header>
 
+  <nav class="tabs"><button data-t="list" class="on">Sıralama</button><button data-t="map">Başarı Haritası</button></nav>
+  <div id="tab-list">
   <div class="controls">
     <div class="seg" id="metric">
       <button data-m="oppPts" class="on">Rakip puanı</button>
@@ -106,6 +131,9 @@ footer a{color:var(--acc2)}
     <table><thead id="th"></thead><tbody id="tb"></tbody></table>
   </div>
 
+  </div>
+  <div id="map" hidden></div>
+
   <footer>
         Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
   </footer>
@@ -124,6 +152,9 @@ fetch("data/data.json?" + Date.now()).then(r => r.json()).then(d => {
     .map(([k, v]) => `<div class="stat"><small>${k}</small><b>${v}</b></div>`).join("");
   $("#upd").textContent = "Son güncelleme: " + new Date(d.updated).toLocaleString("tr-TR");
   render();
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => setTab(b.dataset.t));
+  let tb = "list"; try { tb = localStorage.getItem("tab") || "list"; } catch (e) {}
+  if (tb === "map") setTab("map");
 }).catch(e => $(".grid").innerHTML = `<div class="err">Veri yüklenemedi: ${e.message}</div>`);
 
 document.querySelectorAll("#metric button").forEach(b => b.onclick = () => {
@@ -132,6 +163,95 @@ document.querySelectorAll("#metric button").forEach(b => b.onclick = () => {
 });
 $("#q").oninput = e => { q = e.target.value.toLowerCase(); render(); };
 
+// ---- Başarı Haritası ----
+const QD = {
+  tr: ["Gerçek başarı", "Zor fikstüre rağmen iyi gidiyor", "var(--win)"],
+  tl: ["Fikstürden faydalanan", "İyi gidiyor ama rakipler görece zayıf", "var(--acc2)"],
+  br: ["Zorlanan", "Kötü gidiyor ama fikstür de ağır", "var(--gold)"],
+  bl: ["Hayal kırıklığı", "Kolay rakiplere rağmen kötü gidiyor", "var(--loss)"],
+};
+let mapSel = null, scored = null;
+function score() {
+  const T = D.teams.filter(t => t.p);
+  const nz = (k) => { const v = T.map(k), a = Math.min(...v), b = Math.max(...v); return t => b === a ? 50 : (k(t) - a) / (b - a) * 100; };
+  const dN = nz(t => t.oppPPG), pN = nz(t => t.pts / t.p), gN = nz(t => (t.gf - t.ga) / t.p);
+  T.forEach(t => { t.diff = dN(t); t.perf = .7 * pN(t) + .3 * gN(t); t.raw = .75 * t.perf + .25 * t.diff; });
+  const sN = nz(t => t.raw); T.forEach(t => t.succ = sN(t));
+  const by = k => [...T].sort((a, b) => b[k] - a[k]);
+  by("diff").forEach((t, i) => t.diffRank = i + 1);
+  by("succ").forEach((t, i) => t.succRank = i + 1);
+  T.forEach(t => t.q = (t.perf >= 50 ? "t" : "b") + (t.diff >= 50 ? "r" : "l"));
+  return T;
+}
+const comment = t => {
+  const d = t.diffRank, s = t.succRank, gap = t.rank - s;
+  let c = `Fikstürü ligin en zor ${d}. fikstürü; ligde ${t.rank}. sırada.`;
+  if (gap >= 5) c += ` Fikstür hesaba katılınca ${s}. sıraya çıkıyor — puan tablosu bu takıma haksızlık ediyor.`;
+  else if (gap <= -5) c += ` Fikstür hesaba katılınca ${s}. sıraya düşüyor — kolay rakiplerden beslenmiş.`;
+  else c += ` Fikstüre göre başarı sırası ${s}., puan tablosuyla uyumlu.`;
+  return c;
+};
+function renderMap() {
+  const T = scored = score();
+  if (!mapSel) mapSel = T.slice().sort((a, b) => a.succRank - b.succRank)[0].id;
+  const W = 640, H = 460, P = { l: 46, r: 16, t: 16, b: 44 };
+  const x = v => P.l + v / 100 * (W - P.l - P.r), y = v => H - P.b - v / 100 * (H - P.t - P.b);
+  const corner = (k, xx, yy, anchor) => `<text x="${xx}" y="${yy}" text-anchor="${anchor}" class="ql" fill="${QD[k][2]}">${QD[k][0]}</text>`;
+  const grid = [0, 25, 50, 75, 100].map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="${y(0)}" y2="${y(100)}" class="gl"/><line x1="${x(0)}" x2="${x(100)}" y1="${y(v)}" y2="${y(v)}" class="gl"/>
+    <text x="${x(v)}" y="${H - P.b + 16}" text-anchor="middle" class="tk">${v}</text><text x="${P.l - 8}" y="${y(v) + 4}" text-anchor="end" class="tk">${v}</text>`).join("");
+  const dots = T.map(t => { const s = t.id === mapSel, r = s ? 15 : 11;
+    return `<g class="dot ${s ? "on" : ""}" data-id="${t.id}" transform="translate(${x(t.diff).toFixed(1)},${y(t.perf).toFixed(1)})">
+      <circle r="${r + 3}" class="halo" stroke="${QD[t.q][2]}"/>
+      <image href="${t.crest}" x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}"/><title>${t.name}</title></g>`; }).join("");
+  const t = byId[mapSel];
+  $("#map").innerHTML = `
+  <div class="card"><h2>Başarı haritası</h2>
+    <div class="sub" style="margin:-6px 0 10px">Sağa gittikçe fikstür zorlaşıyor, yukarı çıktıkça takım daha iyi oynuyor. İki değer de 0–100 arası. Bir armaya dokunun.</div>
+    <div class="mapgrid">
+      <div class="svgwrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Fikstür zorluğu ve performans grafiği">
+        <rect x="${x(50)}" y="${y(100)}" width="${x(100) - x(50)}" height="${y(50) - y(100)}" class="qbg" fill="var(--win)"/>
+        <rect x="${x(0)}" y="${y(50)}" width="${x(50) - x(0)}" height="${y(0) - y(50)}" class="qbg" fill="var(--loss)"/>
+        ${grid}
+        <line x1="${x(50)}" x2="${x(50)}" y1="${y(0)}" y2="${y(100)}" class="mid"/><line x1="${x(0)}" x2="${x(100)}" y1="${y(50)}" y2="${y(50)}" class="mid"/>
+        ${corner("tr", x(100) - 6, y(100) + 16, "end")}${corner("tl", x(0) + 6, y(100) + 16, "start")}
+        ${corner("br", x(100) - 6, y(0) - 8, "end")}${corner("bl", x(0) + 6, y(0) - 8, "start")}
+        <text x="${(x(0) + x(100)) / 2}" y="${H - 6}" text-anchor="middle" class="ax">Fikstür zorluğu →</text>
+        <text transform="translate(14,${(y(0) + y(100)) / 2}) rotate(-90)" text-anchor="middle" class="ax">Kendi performansı →</text>
+        ${dots}</svg></div>
+      <div class="info">
+        <div class="top"><img src="${t.crest}" alt="" onerror="this.style.visibility='hidden'"><div><h3>${t.name}</h3>
+          <span class="pill" style="color:${QD[t.q][2]};border-color:${QD[t.q][2]}">${QD[t.q][0]}</span></div></div>
+        ${[["Fikstür zorluğu", t.diff, `${t.diffRank}. en zor`], ["Kendi performansı", t.perf, `${t.pts} puan · ${sgn(t.gf - t.ga)} averaj`], ["Fikstüre göre başarı", t.succ, `${t.succRank}. sırada (ligde ${t.rank}.)`]]
+          .map(([n, v, s]) => `<div class="meter"><div class="mh"><span>${n}</span><b>${Math.round(v)}</b></div><div class="bar"><i class="a" style="width:${v}%"></i></div><small>${s}</small></div>`).join("")}
+        <p class="cm">${comment(t)}</p>
+      </div>
+    </div>
+  </div>
+  <div class="quads">${["tr", "tl", "br", "bl"].map(k => { const L = T.filter(t => t.q === k).sort((a, b) => b.succ - a.succ);
+    return `<div class="card q"><h2 style="color:${QD[k][2]}">${QD[k][0]} · ${L.length}</h2><div class="sub">${QD[k][1]}</div>
+      <div class="chips">${L.map(t => `<button class="chip" data-id="${t.id}">${img(t)}${t.name}</button>`).join("")}</div></div>`; }).join("")}</div>
+  <div class="quads">
+    ${hl("Puan tablosunun hak vermedikleri", "Fikstür hesaba katılınca en çok yükselenler", [...T].sort((a, b) => (b.rank - b.succRank) - (a.rank - a.succRank)).slice(0, 5), t => `▲ ${t.rank - t.succRank}`, "var(--win)")}
+    ${hl("Fikstürle şişenler", "Fikstür hesaba katılınca en çok düşenler", [...T].sort((a, b) => (a.rank - a.succRank) - (b.rank - b.succRank)).slice(0, 5), t => `▼ ${t.succRank - t.rank}`, "var(--loss)")}
+  </div>
+  <div class="card tablewrap"><h2>Fikstüre göre başarı sıralaması</h2>
+    <div class="sub" style="margin:-6px 0 10px">Başarı puanı = %75 kendi performansı + %25 fikstür zorluğu, 0–100 arası. Performans = %70 maç başı puan + %30 maç başı averaj.</div>
+    <table><thead><tr><th>#</th><th>Takım</th><th>Başarı</th><th></th><th>Performans</th><th>Fikstür</th><th>Lig</th><th>Fark</th></tr></thead><tbody>
+    ${[...T].sort((a, b) => a.succRank - b.succRank).map(t => { const g = t.rank - t.succRank;
+      return `<tr data-id="${t.id}"><td>${t.succRank}</td><td><span class="t">${img(t)}${t.name}</span></td><td><b>${Math.round(t.succ)}</b></td>
+      <td style="min-width:110px"><div class="bar"><i class="a" style="width:${t.succ}%"></i></div></td><td>${Math.round(t.perf)}</td><td>${Math.round(t.diff)}</td><td>${t.rank}</td>
+      <td style="color:${g > 0 ? "var(--win)" : g < 0 ? "var(--loss)" : "var(--mute)"}">${g > 0 ? "▲ " + g : g < 0 ? "▼ " + -g : "–"}</td></tr>`; }).join("")}
+    </tbody></table></div>`;
+  document.querySelectorAll("#map [data-id]").forEach(e => e.onclick = () => { mapSel = +e.dataset.id; renderMap(); if (e.tagName !== "g") document.querySelector("#map svg").scrollIntoView({ behavior: "smooth", block: "center" }); });
+}
+const hl = (h, s, L, f, c) => `<div class="card q"><h2>${h}</h2><div class="sub">${s}</div>
+  ${L.map(t => `<div class="hlrow" data-id="${t.id}">${img(t)}<span class="nm">${t.name}</span><small>lig ${t.rank}. → ${t.succRank}.</small><b style="color:${c}">${f(t)}</b></div>`).join("")}</div>`;
+function setTab(k) {
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === k));
+  $("#tab-list").hidden = k !== "list"; $("#map").hidden = k !== "map";
+  if (k === "map") renderMap();
+  try { localStorage.setItem("tab", k); } catch (e) {}
+}
 function render() { bars(); detail(); table(); }
 
 function bars() {
