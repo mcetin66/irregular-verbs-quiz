@@ -65,6 +65,7 @@ tbody tr:hover{background:var(--panel2);cursor:pointer}
 .acc{margin:4px 0 10px 36px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .accsum{color:var(--mute);margin-bottom:8px}.accsum b{color:var(--text)}
 .acct th,.acct td{padding:6px 8px;font-size:13px}.acct td.rk{color:var(--mute)}
+.bands{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.band{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;text-align:center}.band small{display:block;color:var(--mute);font-size:11px}.band b{font-size:18px}
 .acct tr.me td{background:rgba(61,123,255,.22);font-weight:700}.acct tr.me td:first-child{box-shadow:inset 3px 0 var(--acc2)}
 .acct tfoot td{border-bottom:0;font-weight:600}
 @media(max-width:600px){.card{padding:12px}.row{grid-template-columns:18px 20px minmax(0,1fr) auto 30px 10px;gap:6px;padding:6px 4px}.row .bar{display:none}.acc{margin-left:0}}
@@ -152,6 +153,8 @@ function bars() {
   }).join("");
   document.querySelectorAll(".row").forEach(r => r.onclick = () => { const id = +r.dataset.id; sel = sel === id ? null : id; render(); });
 }
+const BANDS = [[1, 8], [9, 16], [17, 24], [25, 36]];
+const dist = t => BANDS.map(([a, b]) => t.fixtures.filter(f => { const r = byId[f.opp].rank; return r >= a && r <= b; }).length);
 const img = t => `<img class="crest" src="${t.crest}" alt="" onerror="this.style.visibility='hidden'" loading="lazy">`;
 
 function acc(t) {
@@ -169,13 +172,14 @@ function acc(t) {
   return `<div class="acc">
     <div class="accsum">${t.name}: lig sırası <b>${t.rank}.</b> · ${t.pts} puan · ${t.w}G ${t.d}B ${t.l}M ·
       rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan · kendi fikstüründe <b>${pos}. / 9</b></div>
+    <div class="bands">${dist(t).map((n, i) => `<span class="band"><small>${BANDS[i][0]}-${BANDS[i][1]}. sıra</small><b>${n}</b></span>`).join("")}</div>
     <div style="overflow-x:auto"><table class="acct"><thead><tr><th>Sıra</th><th>Rakip</th><th>Maç</th><th>Sonuç</th><th>Puan</th><th>A</th><th>Y</th><th>Av</th></tr></thead>
     <tbody>${fx}</tbody><tfoot><tr><td></td><td>Toplam</td><td></td><td></td><td><b>${t.oppPts}</b></td><td class="gf">${t.oppGF}</td><td class="ga">${t.oppGA}</td><td>${sgn(t.oppGD)}</td></tr></tfoot></table></div></div>`;
 }
 function detail() {}
 
 const COLS = [["#", null], ["Takım", null], ["Lig", "rank"], ["P", "pts"], ["Rakip P", "oppPts"],
-  ["Rakip MBP", "oppPPG"], ["Rakip A", "oppGF"], ["Rakip Y", "oppGA"], ["Rakip Av", "oppGD"]];
+  ["Rakip MBP", "oppPPG"], ["1-8", null], ["9-16", null], ["17-24", null], ["25-36", null], ["Rakip A", "oppGF"], ["Rakip Y", "oppGA"], ["Rakip Av", "oppGD"]];
 function table() {
   const list = [...D.teams].sort((a, b) => sortDir * (a[sortKey] - b[sortKey]));
   const ext = k => { const v = D.teams.map(t => t[k]); return [Math.min(...v), Math.max(...v)]; };
@@ -185,6 +189,7 @@ function table() {
     const c = k => { if (!heat[k]) return ""; const [a, b] = heat[k], x = (t[k] - a) / (b - a || 1); return `style="background:rgba(61,123,255,${(x * .55).toFixed(2)})"`; };
     return `<tr data-id="${t.id}"><td>${i + 1}</td><td><span class="t"><img class="crest" src="${t.crest}" alt="" onerror="this.style.visibility='hidden'">${t.name}</span></td>
       <td>${t.rank}</td><td>${t.pts}</td><td><span class="heat" ${c("oppPts")}>${t.oppPts}</span></td><td><span class="heat" ${c("oppPPG")}>${t.oppPPG.toFixed(2)}</span></td>
+      ${dist(t).map((n, j) => `<td><span class="heat" style="background:rgba(61,123,255,${(n / 4 * .55).toFixed(2)})">${n}</span></td>`).join("")}
       <td><span class="heat" ${c("oppGF")}>${t.oppGF}</span></td><td>${t.oppGA}</td><td><span class="heat" ${c("oppGD")}>${sgn(t.oppGD)}</span></td></tr>`;
   }).join("");
   document.querySelectorAll("#th th").forEach(th => th.onclick = () => {
