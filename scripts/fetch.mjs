@@ -47,7 +47,7 @@ for (const t of teams.values()) {
   t.fixtures.sort((x, y) => x.md - y.md);
 }
 
-const list = [...teams.values()].sort((a, b) => b.oppAdj - a.oppAdj || b.oppPts - a.oppPts);
+const list = [...teams.values()].sort((a, b) => b.oppPts - a.oppPts || b.oppGD - a.oppGD);
 const table = [...teams.values()].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
 table.forEach((t, i) => (t.rank = i + 1));
 

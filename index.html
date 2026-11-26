@@ -85,8 +85,7 @@ footer a{color:var(--acc2)}
 
   <div class="controls">
     <div class="seg" id="metric">
-      <button data-m="oppAdj" class="on">Düzeltilmiş puan</button>
-      <button data-m="oppPts">Ham puan</button>
+      <button data-m="oppPts" class="on">Rakip puanı</button>
       <button data-m="oppGF">Rakip golleri</button>
       <button data-m="oppGD">Rakip averajı</button>
     </div>
@@ -107,14 +106,13 @@ footer a{color:var(--acc2)}
   </div>
 
   <footer>
-    <b>Düzeltilmiş puan:</b> rakiplerin toplam puanı eksi o takıma karşı aldıkları puan. Takımın kendi kötü sonucu rakibini "güçlü" göstermesin diye.
-    Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
+        Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
   </footer>
 </div>
 
 <script>
-const M = {oppAdj:"Düzeltilmiş puan",oppPts:"Ham puan",oppGF:"Rakip golleri",oppGD:"Rakip averajı"};
-let D, byId, metric = "oppAdj", sel = null, sortKey = "oppAdj", sortDir = -1, q = "";
+const M = {oppPts:"Rakip puanı",oppGF:"Rakip golleri",oppGD:"Rakip averajı"};
+let D, byId, metric = "oppPts", sel = null, sortKey = "oppPts", sortDir = -1, q = "";
 const $ = s => document.querySelector(s);
 const sgn = n => n > 0 ? "+" + n : "" + n;
 
@@ -137,14 +135,12 @@ function render() { bars(); detail(); table(); }
 
 function bars() {
   const list = [...D.teams].sort((a, b) => b[metric] - a[metric] || b.oppPts - a.oppPts);
-  const vals = list.map(t => t[metric]), mn = Math.min(0, ...vals), mx = Math.max(...vals, metric === "oppAdj" ? Math.max(...list.map(t => t.oppPts)) : 0);
+  const vals = list.map(t => t[metric]), mn = Math.min(0, ...vals), mx = Math.max(...vals, 0);
   const span = mx - mn || 1;
-  $("#legend").innerHTML = (metric === "oppAdj"
-    ? `<span><i style="background:var(--acc)"></i>Düzeltilmiş</span><span><i style="background:#3a4688"></i>Bu takımdan alınan puan</span>` : "")
-    + `<span style="margin-left:auto">Rakip gol: <b style="color:var(--win)">A</b> : <b style="color:var(--loss)">Y</b></span>`;
+  $("#legend").innerHTML = `<span style="margin-left:auto">Rakip gol: <b style="color:var(--win)">A</b> : <b style="color:var(--loss)">Y</b></span>`;
   $("#bars").innerHTML = list.map((t, i) => {
     if (q && !t.name.toLowerCase().includes(q)) return "";
-    const v = t[metric], a = (v - mn) / span * 100, b = metric === "oppAdj" ? (t.oppPts - t.oppAdj) / span * 100 : 0;
+    const v = t[metric], a = (v - mn) / span * 100, b = 0;
     const open = t.id === sel;
     return `<div class="row ${open ? "sel" : ""}" data-id="${t.id}">
       <span class="pos">${i + 1}</span>${img(t)}
@@ -178,18 +174,17 @@ function acc(t) {
 }
 function detail() {}
 
-const COLS = [["#", null], ["Takım", null], ["Lig", "rank"], ["P", "pts"], ["Rakip P", "oppPts"], ["Düz. P", "oppAdj"],
+const COLS = [["#", null], ["Takım", null], ["Lig", "rank"], ["P", "pts"], ["Rakip P", "oppPts"],
   ["Rakip MBP", "oppPPG"], ["Rakip A", "oppGF"], ["Rakip Y", "oppGA"], ["Rakip Av", "oppGD"]];
 function table() {
   const list = [...D.teams].sort((a, b) => sortDir * (a[sortKey] - b[sortKey]));
   const ext = k => { const v = D.teams.map(t => t[k]); return [Math.min(...v), Math.max(...v)]; };
-  const heat = {}; ["oppPts", "oppAdj", "oppPPG", "oppGF", "oppGD"].forEach(k => heat[k] = ext(k));
+  const heat = {}; ["oppPts", "oppPPG", "oppGF", "oppGD"].forEach(k => heat[k] = ext(k));
   $("#th").innerHTML = "<tr>" + COLS.map(([n, k]) => `<th data-k="${k || ""}" class="${k === sortKey ? "on" : ""}">${n}${k === sortKey ? (sortDir < 0 ? " ▼" : " ▲") : ""}</th>`).join("") + "</tr>";
   $("#tb").innerHTML = list.filter(t => !q || t.name.toLowerCase().includes(q)).map((t, i) => {
     const c = k => { if (!heat[k]) return ""; const [a, b] = heat[k], x = (t[k] - a) / (b - a || 1); return `style="background:rgba(61,123,255,${(x * .55).toFixed(2)})"`; };
     return `<tr data-id="${t.id}"><td>${i + 1}</td><td><span class="t"><img class="crest" src="${t.crest}" alt="" onerror="this.style.visibility='hidden'">${t.name}</span></td>
-      <td>${t.rank}</td><td>${t.pts}</td><td><span class="heat" ${c("oppPts")}>${t.oppPts}</span></td>
-      <td><span class="heat" ${c("oppAdj")}>${t.oppAdj}</span></td><td><span class="heat" ${c("oppPPG")}>${t.oppPPG.toFixed(2)}</span></td>
+      <td>${t.rank}</td><td>${t.pts}</td><td><span class="heat" ${c("oppPts")}>${t.oppPts}</span></td><td><span class="heat" ${c("oppPPG")}>${t.oppPPG.toFixed(2)}</span></td>
       <td><span class="heat" ${c("oppGF")}>${t.oppGF}</span></td><td>${t.oppGA}</td><td><span class="heat" ${c("oppGD")}>${sgn(t.oppGD)}</span></td></tr>`;
   }).join("");
   document.querySelectorAll("#th th").forEach(th => th.onclick = () => {

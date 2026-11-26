@@ -3,7 +3,6 @@
 Şampiyonlar Ligi 2026/27 lig aşamasında her takımın 8 rakibinin canlı performansına göre fikstür zorluğu tablosu.
 
 - **Ham puan:** 8 rakibin topladığı toplam puan
-- **Düzeltilmiş puan:** ham puan eksi rakiplerin o takımdan aldığı puanlar (Csató vd. yaklaşımı)
 - Rakiplerin attığı/yediği goller, averaj, maç başı puan
 
 ## Çalıştırma
