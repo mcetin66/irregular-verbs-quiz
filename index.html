@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#070b1f;--panel:#0f1533;--panel2:#161e45;--line:#26306a;--text:#e9ecff;--mute:#8d96c7;
+:root{color-scheme:dark;--bg:#070b1f;--panel:#0f1533;--panel2:#161e45;--line:#26306a;--text:#e9ecff;--mute:#8d96c7;
 --acc:#3d7bff;--acc2:#00d1ff;--gold:#ffc940;--win:#22c55e;--draw:#94a3b8;--loss:#ef4444}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#1b2a7a 0%,transparent 60%),var(--bg);
@@ -25,11 +25,11 @@ h1 span{background:linear-gradient(90deg,var(--acc2),var(--acc));-webkit-backgro
 .seg button{background:none;border:0;color:var(--mute);padding:7px 12px;border-radius:7px;cursor:pointer;font:inherit;font-weight:600}
 .seg button.on{background:var(--acc);color:#fff}
 input[type=search]{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 12px;font:inherit;flex:1;min-width:160px;max-width:260px}
-.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-.card{background:linear-gradient(180deg,var(--panel),#0c1129);border:1px solid var(--line);border-radius:16px;padding:16px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+
+.card{min-width:0;background:linear-gradient(180deg,var(--panel),#0c1129);border:1px solid var(--line);border-radius:16px;padding:16px}
 .card h2{margin:0 0 12px;font-size:15px;color:var(--mute);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.row{display:grid;grid-template-columns:28px 26px minmax(90px,150px) 1fr 52px;gap:10px;align-items:center;
+.row{display:grid;grid-template-columns:28px 26px minmax(90px,170px) 1fr 64px 40px 14px;gap:10px;align-items:center;
 padding:6px 8px;border-radius:9px;cursor:pointer}
 .row:hover{background:var(--panel2)}.row.sel{background:#1d2a66;outline:1px solid var(--acc)}
 .pos{color:var(--mute);font-weight:600;text-align:right}
@@ -60,6 +60,13 @@ td:nth-child(2),th:nth-child(2){text-align:left}
 td .t{display:flex;align-items:center;gap:8px}
 tbody tr:hover{background:var(--panel2);cursor:pointer}
 .heat{border-radius:6px;padding:2px 6px}
+.gg{text-align:center;font-variant-numeric:tabular-nums;color:var(--mute)}.gf{color:var(--win)}.ga{color:var(--loss)}
+.chev{color:var(--mute)}
+.acc{margin:4px 0 10px 36px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.accsum{color:var(--mute);margin-bottom:8px}.accsum b{color:var(--text)}
+.acct th,.acct td{padding:6px 8px;font-size:13px}.acct td.rk{color:var(--mute)}
+.acct tfoot td{border-bottom:0;font-weight:600}
+@media(max-width:600px){.card{padding:12px}.row{grid-template-columns:18px 20px minmax(0,1fr) auto 30px 10px;gap:6px;padding:6px 4px}.row .bar{display:none}.acc{margin-left:0}}
 footer{color:var(--mute);font-size:12px;margin-top:22px}
 footer a{color:var(--acc2)}
 .err{padding:40px;text-align:center;color:var(--loss)}
@@ -87,12 +94,11 @@ footer a{color:var(--acc2)}
 
   <div class="grid">
     <div class="card">
-      <h2>Fikstür zorluğu sıralaması</h2>
+      <h2>Fikstür zorluğu sıralaması</h2><div class="sub" style="margin:-6px 0 10px">Bir takıma dokunun, rakipleri altında açılsın.</div>
       <div class="legend" id="legend"></div>
       <div id="bars"></div>
     </div>
-    <div class="card detail" id="detail"></div>
-  </div>
+      </div>
 
   <div class="card tablewrap">
     <h2>Tüm veriler</h2>
@@ -132,41 +138,40 @@ function bars() {
   const list = [...D.teams].sort((a, b) => b[metric] - a[metric] || b.oppPts - a.oppPts);
   const vals = list.map(t => t[metric]), mn = Math.min(0, ...vals), mx = Math.max(...vals, metric === "oppAdj" ? Math.max(...list.map(t => t.oppPts)) : 0);
   const span = mx - mn || 1;
-  $("#legend").innerHTML = metric === "oppAdj"
-    ? `<span><i style="background:var(--acc)"></i>Düzeltilmiş</span><span><i style="background:#3a4688"></i>Bu takımdan alınan puan</span>` : "";
+  $("#legend").innerHTML = (metric === "oppAdj"
+    ? `<span><i style="background:var(--acc)"></i>Düzeltilmiş</span><span><i style="background:#3a4688"></i>Bu takımdan alınan puan</span>` : "")
+    + `<span style="margin-left:auto">Rakip gol: <b style="color:var(--win)">A</b> : <b style="color:var(--loss)">Y</b></span>`;
   $("#bars").innerHTML = list.map((t, i) => {
     if (q && !t.name.toLowerCase().includes(q)) return "";
     const v = t[metric], a = (v - mn) / span * 100, b = metric === "oppAdj" ? (t.oppPts - t.oppAdj) / span * 100 : 0;
-    return `<div class="row ${t.id === sel ? "sel" : ""}" data-id="${t.id}">
-      <span class="pos">${i + 1}</span><img class="crest" src="${t.crest}" alt="" onerror="this.style.visibility='hidden'" loading="lazy">
+    const open = t.id === sel;
+    return `<div class="row ${open ? "sel" : ""}" data-id="${t.id}">
+      <span class="pos">${i + 1}</span>${img(t)}
       <span class="nm">${t.name}</span>
       <div class="bar"><i class="a" style="width:${a}%"></i><i class="b" style="width:${b}%"></i></div>
-      <span class="val">${metric === "oppGD" ? sgn(v) : v}</span></div>`;
+      <span class="gg"><b class="gf">${t.oppGF}</b>:<b class="ga">${t.oppGA}</b></span>
+      <span class="val">${metric === "oppGD" ? sgn(v) : v}</span><span class="chev">${open ? "▾" : "▸"}</span></div>
+      ${open ? acc(t) : ""}`;
   }).join("");
-  document.querySelectorAll(".row").forEach(r => r.onclick = () => { sel = +r.dataset.id; render(); });
+  document.querySelectorAll(".row").forEach(r => r.onclick = () => { const id = +r.dataset.id; sel = sel === id ? null : id; render(); });
 }
+const img = t => `<img class="crest" src="${t.crest}" alt="" onerror="this.style.visibility='hidden'" loading="lazy">`;
 
-function detail() {
-  const t = byId[sel], rank = [...D.teams].sort((a, b) => b[metric] - a[metric]).indexOf(t) + 1;
-  const fx = t.fixtures.map(f => {
+function acc(t) {
+  const fx = [...t.fixtures].sort((x, y) => byId[x.opp].rank - byId[y.opp].rank).map(f => {
     const o = byId[f.opp];
-    const r = !f.done ? ["U", "–"] : f.gf > f.ga ? ["W", f.gf + "-" + f.ga] : f.gf === f.ga ? ["D", f.gf + "-" + f.ga] : ["L", f.gf + "-" + f.ga];
-    return `<div class="fx"><span class="md">H${f.md}</span><img class="crest" src="${o.crest}" alt="" onerror="this.style.visibility='hidden'">
-      <span>${o.name} <span class="ha">${f.home ? "(İç)" : "(Dış)"}</span></span>
-      <span class="res ${r[0]}">${r[1]}</span><span class="opts" title="Rakibin puanı">${o.pts}p</span></div>`;
+    const r = !f.done ? ["U", "Oynanmadı"] : f.gf > f.ga ? ["W", f.gf + "-" + f.ga] : f.gf === f.ga ? ["D", f.gf + "-" + f.ga] : ["L", f.gf + "-" + f.ga];
+    return `<tr><td class="rk">${o.rank}.</td><td><span class="t">${img(o)}${o.name}</span></td>
+      <td class="ha">${f.home ? "İç" : "Dış"} · H${f.md}</td><td><span class="res ${r[0]}">${r[1]}</span></td>
+      <td><b>${o.pts}</b></td><td class="gf">${o.gf}</td><td class="ga">${o.ga}</td><td>${sgn(o.gf - o.ga)}</td></tr>`;
   }).join("");
-  $("#detail").innerHTML = `<div class="top"><img src="${t.crest}" alt=""><div><h3>${t.name}</h3>
-    <small style="color:var(--mute)">Lig sırası ${t.rank}. · ${t.pts} puan · ${t.w}G ${t.d}B ${t.l}M</small></div></div>
-    <div class="kpis">
-      <div class="kpi"><small>Zorluk sırası</small><b>${rank}. / 36</b></div>
-      <div class="kpi"><small>Rakip puanı</small><b>${t.oppPts} <small>(${t.oppAdj})</small></b></div>
-      <div class="kpi"><small>Rakip maç başı</small><b>${t.oppPPG.toFixed(2)}</b></div>
-      <div class="kpi"><small>Rakip attığı</small><b>${t.oppGF}</b></div>
-      <div class="kpi"><small>Rakip yediği</small><b>${t.oppGA}</b></div>
-      <div class="kpi"><small>Rakip averajı</small><b>${sgn(t.oppGD)}</b></div>
-    </div>
-    <h2>8 rakip</h2>${fx}`;
+  return `<div class="acc">
+    <div class="accsum">${t.name}: lig sırası <b>${t.rank}.</b> · ${t.pts} puan · ${t.w}G ${t.d}B ${t.l}M ·
+      rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan</div>
+    <div style="overflow-x:auto"><table class="acct"><thead><tr><th>Sıra</th><th>Rakip</th><th>Maç</th><th>Sonuç</th><th>Puan</th><th>A</th><th>Y</th><th>Av</th></tr></thead>
+    <tbody>${fx}</tbody><tfoot><tr><td></td><td>Toplam</td><td></td><td></td><td><b>${t.oppPts}</b></td><td class="gf">${t.oppGF}</td><td class="ga">${t.oppGA}</td><td>${sgn(t.oppGD)}</td></tr></tfoot></table></div></div>`;
 }
+function detail() {}
 
 const COLS = [["#", null], ["Takım", null], ["Lig", "rank"], ["P", "pts"], ["Rakip P", "oppPts"], ["Düz. P", "oppAdj"],
   ["Rakip MBP", "oppPPG"], ["Rakip A", "oppGF"], ["Rakip Y", "oppGA"], ["Rakip Av", "oppGD"]];
