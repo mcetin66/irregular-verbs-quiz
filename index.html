@@ -124,6 +124,16 @@ background:linear-gradient(160deg,rgba(61,123,255,.22),rgba(15,21,51,.9) 60%);bo
 .cell.W{border-bottom-color:var(--win)}.cell.D{border-bottom-color:var(--draw)}.cell.L{border-bottom-color:var(--loss)}
 .hm .sum{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:700;padding-left:8px}
 @media(prefers-reduced-motion:reduce){.hc{transition:none}}
+[hidden]{display:none!important}
+h1 #ctitle{background:none;-webkit-text-fill-color:currentColor;color:var(--text)}
+#comps{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+#comps button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(15,21,51,.7);
+font-family:"Barlow Condensed",Inter,sans-serif;font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+#comps button i{width:10px;height:10px;border-radius:50%}
+#comps button.on{color:#fff;border-color:var(--acc2);background:linear-gradient(135deg,var(--acc),rgba(15,21,51,.8))}
+#comps button:focus-visible{outline:2px solid var(--acc2)}
+#err{margin:0 0 16px}
+.bar .a{background:linear-gradient(90deg,var(--acc),var(--acc2))}
 footer{color:var(--mute);font-size:12px;margin-top:22px}
 footer a{color:var(--acc2)}
 .err{padding:40px;text-align:center;color:var(--loss)}
@@ -133,12 +143,14 @@ footer a{color:var(--acc2)}
 <div class="wrap">
   <header>
     <div>
-      <h1>Şampiyonlar Ligi <span>Rakip Gücü</span></h1>
-      <div class="sub">Her takımın lig aşamasındaki 8 rakibinin bu sezon topladığı puan ve goller. Liste ne kadar üstteyse fikstür o kadar zor.</div>
+      <h1><span id="ctitle">Şampiyonlar Ligi</span> <span>Rakip Gücü</span></h1>
+      <div class="sub" id="csub"></div>
     </div>
     <div class="stats" id="stats"></div>
   </header>
 
+  <nav id="comps" aria-label="Turnuva"><button data-c="ucl" class="on"><i style="background:#3d7bff"></i>Şampiyonlar Ligi</button><button data-c="uel"><i style="background:#ff7a1a"></i>Avrupa Ligi</button><button data-c="uecl"><i style="background:#16b364"></i>Konferans Ligi</button></nav>
+  <div class="err" id="err" hidden></div>
   <section id="hero" aria-label="Öne çıkanlar"></section>
   <nav class="tabs"><button data-t="list" class="on">Sıralama</button><button data-t="map">Başarı Haritası</button><button data-t="heat">Isı Haritası</button></nav>
   <div id="tab-list">
@@ -180,20 +192,39 @@ let D, byId, metric = "oppPts", sel = null, sortKey = "oppPts", sortDir = -1, q 
 const $ = s => document.querySelector(s);
 const sgn = n => n > 0 ? "+" + n : "" + n;
 
-const load = (n = 0) => fetch("data/data.json", { cache: "no-store" }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-  .catch(e => { if (n < 2) return new Promise(res => setTimeout(res, 800)).then(() => load(n + 1)); throw e; });
-load().then(d => {
-  D = d; byId = Object.fromEntries(d.teams.map(t => [t.id, t]));
-  sel = d.teams[0].id;
-  $("#stats").innerHTML = [["Sezon", d.season + "/" + (+d.season + 1 + "").slice(2)], ["Hafta", d.matchday + " / 8"], ["Oynanan maç", d.played + " / " + d.total]]
-    .map(([k, v]) => `<div class="stat"><small>${k}</small><b>${v}</b></div>`).join("");
-  $("#upd").textContent = "Son güncelleme: " + new Date(d.updated).toLocaleString("tr-TR");
-  render();
-  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => setTab(b.dataset.t));
-  let tb = "list"; try { tb = localStorage.getItem("tab") || "list"; } catch (e) {}
-  renderHero();
-  if (tb !== "list") setTab(tb);
-}).catch(e => { console.error(e); $("#tab-list").hidden = false; $("#tab-list").innerHTML = `<div class="err">Veri yüklenemedi (${e.name}: ${e.message}). Sayfayı yenileyin.</div>`; });
+const COMPS = {
+  ucl: { name: "Şampiyonlar Ligi", short: "ŞL", acc: "#3d7bff", acc2: "#00d1ff" },
+  uel: { name: "Avrupa Ligi", short: "UEL", acc: "#ff7a1a", acc2: "#ffb648" },
+  uecl: { name: "Konferans Ligi", short: "UECL", acc: "#16b364", acc2: "#4be3a0" },
+};
+let COMP = "ucl", tab = "list";
+const cache = {};
+const load = (c, n = 0) => cache[c] ? Promise.resolve(cache[c]) : fetch(`data/${c}.json`, { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(d => (cache[c] = d))
+  .catch(e => { if (n < 2) return new Promise(res => setTimeout(res, 800)).then(() => load(c, n + 1)); throw e; });
+function boot(c) {
+  COMP = c; try { localStorage.setItem("comp", c); } catch (e) {}
+  const C = COMPS[c], R = document.documentElement.style;
+  R.setProperty("--acc", C.acc); R.setProperty("--acc2", C.acc2);
+  document.querySelectorAll("#comps button").forEach(b => b.classList.toggle("on", b.dataset.c === c));
+  $("#ctitle").textContent = C.name;
+  return load(c).then(d => {
+    $("#err").hidden = true;
+    D = d; byId = Object.fromEntries(d.teams.map(t => [t.id, t]));
+    sel = null; mapSel = null; q = ""; $("#q").value = "";
+    $("#csub").textContent = `Her takımın lig aşamasındaki ${d.games} rakibinin bu sezon topladığı puan ve goller. Liste ne kadar üstteyse fikstür o kadar zor.`;
+    $("#stats").innerHTML = [["Sezon", d.season + "/" + (+d.season + 1 + "").slice(2)], ["Hafta", d.matchday + " / " + d.games], ["Oynanan maç", d.played + " / " + d.total]]
+      .map(([k, v]) => `<div class="stat"><small>${k}</small><b>${v}</b></div>`).join("");
+    $("#upd").textContent = "Son güncelleme: " + new Date(d.updated).toLocaleString("tr-TR");
+    renderHero();
+    setTab(tab);
+  }).catch(e => { console.error(e); const x = $("#err"); x.hidden = false; x.textContent = `${C.name} verisi yüklenemedi (${e.message}). Sayfayı yenileyin.`; });
+}
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => setTab(b.dataset.t));
+document.querySelectorAll("#comps button").forEach(b => b.onclick = () => boot(b.dataset.c));
+try { tab = localStorage.getItem("tab") || "list"; COMP = localStorage.getItem("comp") || "ucl"; } catch (e) {}
+boot(COMPS[COMP] ? COMP : "ucl");
+
 
 document.querySelectorAll("#metric button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#metric button").forEach(x => x.classList.toggle("on", x === b));
@@ -288,8 +319,10 @@ function renderMap() {
 const hl = (h, s, L, f, c) => `<div class="card q"><h2>${h}</h2><div class="sub">${s}</div>
   ${L.map(t => `<div class="hlrow" data-id="${t.id}">${img(t)}<span class="nm">${t.name}</span><small>lig ${t.rank}. → ${t.succRank}.</small><b style="color:${c}">${f(t)}</b></div>`).join("")}</div>`;
 function setTab(k) {
+  tab = k;
   document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === k));
   $("#tab-list").hidden = k !== "list"; $("#map").hidden = k !== "map"; $("#heat").hidden = k !== "heat";
+  if (k === "list") render();
   if (k === "map") renderMap();
   if (k === "heat") renderHeat();
   try { localStorage.setItem("tab", k); } catch (e) {}
@@ -324,7 +357,7 @@ function renderHeat() {
       <button data-h="pts" class="${heatBy === "pts" ? "on" : ""}">Rakibin puanı</button><button data-h="elo" class="${heatBy === "elo" ? "on" : ""}">Rakibin Elo'su</button></div>
       <span class="scale"><small>Zayıf</small><i></i><small>Güçlü</small></span></div>
     <div class="sub" style="margin:-4px 0 12px">Her satır bir takımın 8 haftalık fikstürü. Kırmızıya döndükçe rakip güçleniyor. Alt çizgi sonucu gösteriyor: yeşil galibiyet, gri beraberlik, kırmızı mağlubiyet.</div>
-    <div class="hmwrap"><table class="hm"><thead><tr><th></th><th class="tl">Takım</th>${[1,2,3,4,5,6,7,8].map(m => `<th>H${m}${m <= D.matchday ? "" : "<small>•</small>"}</th>`).join("")}<th>${heatBy === "elo" ? "Ort." : "Top."}</th></tr></thead><tbody>
+    <div class="hmwrap"><table class="hm"><thead><tr><th></th><th class="tl">Takım</th>${Array.from({ length: D.games }, (_, i) => i + 1).map(m => `<th>H${m}${m <= D.matchday ? "" : "<small>•</small>"}</th>`).join("")}<th>${heatBy === "elo" ? "Ort." : "Top."}</th></tr></thead><tbody>
     ${T.map((t, i) => `<tr data-id="${t.id}"><td class="rk">${i + 1}</td><td class="tl"><span class="t">${img(t)}${t.name}</span></td>
       ${t.fixtures.map(f => { const o = byId[f.opp], v = val(o);
         return `<td><div class="cell ${res(f)}" style="background:${col(v)}" title="H${f.md} ${f.home ? "İç" : "Dış"}: ${o.name} (${v})${f.done ? " " + f.gf + "-" + f.ga : ""}">
@@ -364,7 +397,7 @@ function acc(t) {
   const pos = rows.findIndex(f => f.self) + 1;
   const fx = rows.map(f => {
     if (f.self) return `<tr class="me"><td class="rk">${t.rank}.</td><td><span class="t">${img(t)}${t.name}</span></td>
-      <td class="ha" colspan="2">Fikstüründe ${pos}. / 9</td><td>${t.elo ?? "–"}</td><td><b>${t.pts}</b></td><td class="gf">${t.gf}</td><td class="ga">${t.ga}</td><td>${sgn(t.gf - t.ga)}</td></tr>`;
+      <td class="ha" colspan="2">Fikstüründe ${pos}. / ${D.games + 1}</td><td>${t.elo ?? "–"}</td><td><b>${t.pts}</b></td><td class="gf">${t.gf}</td><td class="ga">${t.ga}</td><td>${sgn(t.gf - t.ga)}</td></tr>`;
     const o = byId[f.opp];
     const r = !f.done ? ["U", "Oynanmadı"] : f.gf > f.ga ? ["W", f.gf + "-" + f.ga] : f.gf === f.ga ? ["D", f.gf + "-" + f.ga] : ["L", f.gf + "-" + f.ga];
     return `<tr><td class="rk">${o.rank}.</td><td><span class="t">${img(o)}${o.name}</span></td>
@@ -373,7 +406,7 @@ function acc(t) {
   }).join("");
   return `<div class="acc">
     <div class="accsum">${t.name}: lig sırası <b>${t.rank}.</b> · ${t.pts} puan · ${t.w}G ${t.d}B ${t.l}M ·
-      rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan · kendi fikstüründe <b>${pos}. / 9</b></div>
+      rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan · kendi fikstüründe <b>${pos}. / ${D.games + 1}</b></div>
     <div class="bands">${dist(t).map((n, i) => `<span class="band"><small>${BANDS[i][0]}-${BANDS[i][1]}. sıra</small><b>${n}</b></span>`).join("")}</div>
     <div style="overflow-x:auto"><table class="acct"><thead><tr><th>Sıra</th><th>Rakip</th><th>Maç</th><th>Sonuç</th><th>Elo</th><th>Puan</th><th>A</th><th>Y</th><th>Av</th></tr></thead>
     <tbody>${fx}</tbody><tfoot><tr><td></td><td>Toplam</td><td></td><td></td><td title="Ortalama">ø ${t.oppElo ?? "–"}</td><td><b>${t.oppPts}</b></td><td class="gf">${t.oppGF}</td><td class="ga">${t.oppGA}</td><td>${sgn(t.oppGD)}</td></tr></tfoot></table></div></div>`;
