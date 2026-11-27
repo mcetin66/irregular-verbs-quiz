@@ -22,7 +22,7 @@ for (const [comp, league] of Object.entries(COMPS)) {
   const evs = (await events(league)).sort((a, b) => a.date.localeCompare(b.date));
   const teams = new Map();
   const team = (c) => {
-    const id = c.team.id;
+    const id = +c.team.id;
     if (!teams.has(id)) teams.set(id, { id, name: c.team.shortDisplayName || c.team.displayName, full: c.team.displayName,
       tla: c.team.abbreviation, crest: c.team.logo, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, fixtures: [] });
     return teams.get(id);
