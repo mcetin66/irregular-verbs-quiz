@@ -65,11 +65,11 @@ tbody tr:hover{background:var(--panel2);cursor:pointer}
 .acc{margin:4px 0 10px 36px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .accsum{color:var(--mute);margin-bottom:8px}.accsum b{color:var(--text)}
 .acct th,.acct td{padding:6px 8px;font-size:13px}.acct td.rk{color:var(--mute)}
-.bands{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.band{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;text-align:center}.band small{display:block;color:var(--mute);font-size:11px}.band b{font-size:18px}
+.bands{display:grid;grid-template-columns:repeat(2,1fr);align-content:center;gap:6px;margin-bottom:10px}.band{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;text-align:center}.band small{display:block;color:var(--mute);font-size:11px}.band b{font-size:18px}
 .acct tr.me td{background:rgba(61,123,255,.22);font-weight:700}.acct tr.me td:first-child{box-shadow:inset 3px 0 var(--acc2)}
 .acct tfoot td{border-bottom:0;font-weight:600}
 @media(max-width:600px){.card{padding:12px}.row{grid-template-columns:18px 20px minmax(0,1fr) auto 30px 10px;gap:6px;padding:6px 4px}.row .bar{display:none}.acc{margin-left:0}}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}.tabs button{white-space:nowrap;flex:none}@media(max-width:600px){.tabs button{padding:10px 9px;font-size:16px!important}}
 .tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mute);font:inherit;font-weight:600;font-size:15px;padding:10px 14px;cursor:pointer}
 .tabs button.on{color:var(--text);border-color:var(--acc2)}
 #map{display:grid;gap:18px}
@@ -134,6 +134,33 @@ font-family:"Barlow Condensed",Inter,sans-serif;font-weight:700;font-size:17px;l
 #comps button:focus-visible{outline:2px solid var(--acc2)}
 #err{margin:0 0 16px}
 .bar .a{background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.pick{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;margin-bottom:12px}
+.pk{display:flex;align-items:center;gap:10px;background:var(--panel2);border:2px solid var(--c);border-radius:12px;padding:8px 10px;min-width:0}
+.pk .crest{width:34px;height:34px}
+.pk select{flex:1;min-width:0;background:transparent;border:0;color:var(--text);font:700 20px "Barlow Condensed",Inter,sans-serif;cursor:pointer}
+.pk select option{background:var(--panel);color:var(--text)}
+.swap{all:unset;cursor:pointer;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font-size:20px;color:var(--mute)}
+.swap:hover,.swap:focus-visible{color:var(--text);border-color:var(--acc2)}
+.vsnote{background:var(--panel2);border-radius:10px;padding:8px 12px;margin-bottom:12px;color:var(--mute)}.vsnote b{color:var(--text)}
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:820px){.cgrid{grid-template-columns:minmax(0,1fr)}}
+.radar{width:100%;max-width:440px;display:block;margin:0 auto;overflow:visible}
+.rg{fill:none;stroke:var(--line);stroke-width:1}.rl{fill:var(--mute);font-size:12px;font-weight:600}
+.lg{display:flex;justify-content:center;gap:16px;margin:6px 0}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.axn{color:var(--mute);font-size:12px;line-height:1.6;text-align:center}.axn{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 12px}.axn span{max-width:100%}
+.ctab{width:100%}.ctab td,.ctab th{text-align:center;padding:9px 6px}.ctab tbody th{color:var(--mute);font-weight:500;font-size:13px}
+.ctab td{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.ctab td.win{color:var(--win)}
+.ctab thead th{font:700 18px "Barlow Condensed",Inter,sans-serif}
+.cm2{line-height:1.5;margin:12px 0 0}
+.cfxs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media(max-width:620px){.cfxs{grid-template-columns:minmax(0,1fr)}}
+.cfx{display:grid;grid-template-columns:28px 22px minmax(0,1fr) 30px 44px;gap:8px;align-items:center;padding:6px 6px;border-top:1px solid var(--line);border-radius:6px}
+.cfx .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cfx small{color:var(--mute);text-align:right}.cfx .md{color:var(--mute);font-size:12px}.cfx .res{text-align:center}
+.cfx.cm{background:rgba(255,201,64,.10);box-shadow:inset 3px 0 var(--gold)}.cfx.vs{background:rgba(61,123,255,.18);box-shadow:inset 3px 0 var(--acc2)}
+.cbtn{all:unset;cursor:pointer;margin-left:8px;padding:3px 10px;border-radius:999px;border:1px solid var(--acc2);color:var(--acc2);font-size:12px;font-weight:700}
+.cbtn:hover,.cbtn:focus-visible{background:var(--acc2);color:#04102a}
+.mini{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;align-items:center;margin-bottom:10px}
+@media(max-width:620px){.mini{grid-template-columns:minmax(0,1fr)}.mini .radar{max-width:220px}}
 footer{color:var(--mute);font-size:12px;margin-top:22px}
 footer a{color:var(--acc2)}
 .err{padding:40px;text-align:center;color:var(--loss)}
@@ -152,7 +179,7 @@ footer a{color:var(--acc2)}
   <nav id="comps" aria-label="Turnuva"><button data-c="ucl" class="on"><i style="background:#3d7bff"></i>Şampiyonlar Ligi</button><button data-c="uel"><i style="background:#ff7a1a"></i>Avrupa Ligi</button><button data-c="uecl"><i style="background:#16b364"></i>Konferans Ligi</button></nav>
   <div class="err" id="err" hidden></div>
   <section id="hero" aria-label="Öne çıkanlar"></section>
-  <nav class="tabs"><button data-t="list" class="on">Sıralama</button><button data-t="map">Başarı Haritası</button><button data-t="heat">Isı Haritası</button></nav>
+  <nav class="tabs"><button data-t="list" class="on">Sıralama</button><button data-t="map">Başarı Haritası</button><button data-t="heat">Isı Haritası</button><button data-t="cmp">Karşılaştır</button></nav>
   <div id="tab-list">
   <div class="controls">
     <div class="seg" id="metric">
@@ -180,6 +207,7 @@ footer a{color:var(--acc2)}
   </div>
   <div id="map" hidden></div>
   <div id="heat" hidden></div>
+  <div id="cmp" hidden></div>
 
   <footer>
         Elo: <a href="https://clubelo.com" target="_blank" rel="noopener">clubelo.com</a> · Veri: <a href="https://www.football-data.org" target="_blank" rel="noopener">football-data.org</a> · <span id="upd"></span>
@@ -321,10 +349,11 @@ const hl = (h, s, L, f, c) => `<div class="card q"><h2>${h}</h2><div class="sub"
 function setTab(k) {
   tab = k;
   document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === k));
-  $("#tab-list").hidden = k !== "list"; $("#map").hidden = k !== "map"; $("#heat").hidden = k !== "heat";
+  $("#tab-list").hidden = k !== "list"; $("#map").hidden = k !== "map"; $("#heat").hidden = k !== "heat"; $("#cmp").hidden = k !== "cmp";
   if (k === "list") render();
   if (k === "map") renderMap();
   if (k === "heat") renderHeat();
+  if (k === "cmp") renderCmp();
   try { localStorage.setItem("tab", k); } catch (e) {}
 }
 // ---- Vitrin + Isı haritası ----
@@ -367,6 +396,78 @@ function renderHeat() {
   document.querySelectorAll("#heatby button").forEach(b => b.onclick = () => { heatBy = b.dataset.h; renderHeat(); });
   document.querySelectorAll("#heat tbody tr").forEach(r => r.onclick = () => { setTab("list"); sel = +r.dataset.id; render(); document.querySelector(".row.sel")?.scrollIntoView({ behavior: "smooth", block: "center" }); });
 }
+// ---- Karşılaştırma + radar ----
+let cmpA = null, cmpB = null;
+const AX = [
+  ["Fikstür zorluğu", t => t.oppPPG, "Rakiplerin maç başı puanı"],
+  ["Rakip Elo", t => t.oppElo, "Rakiplerin ortalama Elo'su"],
+  ["Performans", t => t.p ? t.pts / t.p : 0, "Maç başı puan"],
+  ["Elo gücü", t => t.elo, "Takımın kendi Elo'su"],
+  ["Hücum", t => t.p ? t.gf / t.p : 0, "Maç başı atılan gol"],
+  ["Savunma", t => t.p ? -t.ga / t.p : 0, "Maç başı yenen gol (az = iyi)"],
+];
+function axes() {
+  return AX.map(([n, f, d]) => { const v = D.teams.map(f).filter(x => x != null), a = Math.min(...v), b = Math.max(...v);
+    return { n, d, s: t => { const x = f(t); return x == null ? null : b === a ? 50 : (x - a) / (b - a) * 100; } }; });
+}
+function radar(list, size = 340) {
+  const A = axes(), c = size / 2, R = c - 62, k = A.length;
+  const pt = (i, v) => { const ang = -Math.PI / 2 + i * 2 * Math.PI / k; return [c + Math.cos(ang) * R * v / 100, c + Math.sin(ang) * R * v / 100]; };
+  const ring = v => A.map((_, i) => pt(i, v).join(",")).join(" ");
+  return `<svg viewBox="0 0 ${size} ${size}" class="radar" role="img" aria-label="Radar grafiği">
+    ${[25, 50, 75, 100].map(v => `<polygon points="${ring(v)}" class="rg"/>`).join("")}
+    ${A.map((a, i) => { const [x, y] = pt(i, 100), [lx, ly] = pt(i, 122);
+      return `<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" class="rg"/><text x="${lx}" y="${ly + 4}" text-anchor="${Math.abs(lx - c) < 8 ? "middle" : lx > c ? "start" : "end"}" class="rl">${a.n}</text>`; }).join("")}
+    ${list.map(([t, col]) => { const P = A.map((a, i) => pt(i, a.s(t) ?? 0));
+      return `<polygon points="${P.map(p => p.join(",")).join(" ")}" fill="${col}" fill-opacity=".22" stroke="${col}" stroke-width="2.5"/>
+        ${P.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${col}"/>`).join("")}`; }).join("")}
+  </svg>`;
+}
+function renderCmp() {
+  const T = score();
+  const bySucc = [...T].sort((a, b) => a.succRank - b.succRank);
+  if (!byId[cmpA]) cmpA = sel && byId[sel] ? sel : bySucc[0].id;
+  if (!byId[cmpB] || cmpB === cmpA) cmpB = bySucc.find(t => t.id !== cmpA).id;
+  const a = byId[cmpA], b = byId[cmpB], CA = "var(--acc2)", CB = "var(--gold)";
+  const opts = id => [...D.teams].sort((x, y) => x.name.localeCompare(y.name, "tr")).map(t => `<option value="${t.id}" ${t.id === id ? "selected" : ""}>${t.name}</option>`).join("");
+  const A = axes();
+  const rows = [
+    ["Lig sırası", t => t.rank, -1, v => v + "."], ["Puan", t => t.pts, 1], ["Averaj", t => t.gf - t.ga, 1, sgn],
+    ["Elo", t => t.elo, 1], ["Rakip puanı", t => t.oppPts, 1], ["Rakip Elo ort.", t => t.oppElo, 1],
+    ["Fikstür zorluk sırası", t => t.diffRank, -1, v => v + "."], ["Fikstüre göre başarı", t => Math.round(t.succ), 1],
+    ["Başarı sırası", t => t.succRank, -1, v => v + "."],
+  ];
+  const opA = new Set(a.fixtures.map(f => f.opp)), common = b.fixtures.filter(f => opA.has(f.opp)).map(f => f.opp);
+  const fx = t => t.fixtures.map(f => { const o = byId[f.opp], r = !f.done ? ["U", "–"] : f.gf > f.ga ? ["W", f.gf + "-" + f.ga] : f.gf === f.ga ? ["D", f.gf + "-" + f.ga] : ["L", f.gf + "-" + f.ga];
+    return `<div class="cfx ${common.includes(f.opp) ? "cm" : ""} ${f.opp === (t === a ? b : a).id ? "vs" : ""}"><span class="md">H${f.md}</span>${img(o)}<span class="nm">${o.name}</span><small>${o.rank}.</small><span class="res ${r[0]}">${r[1]}</span></div>`; }).join("");
+  const vsA = a.fixtures.find(f => f.opp === b.id);
+  $("#cmp").innerHTML = `<div class="card">
+    <h2>Takım karşılaştırma</h2>
+    <div class="pick">
+      <label class="pk" style="--c:${CA}">${img(a)}<select id="ca" aria-label="Birinci takım">${opts(a.id)}</select></label>
+      <button id="swap" class="swap" aria-label="Takımları değiştir">⇄</button>
+      <label class="pk" style="--c:${CB}">${img(b)}<select id="cb" aria-label="İkinci takım">${opts(b.id)}</select></label>
+    </div>
+    ${vsA ? `<div class="vsnote">Bu iki takım H${vsA.md}'de karşılaşıyor${vsA.done ? `: <b>${a.name} ${vsA.gf}-${vsA.ga} ${b.name}</b>` : " (henüz oynanmadı)"}.</div>` : ""}
+    <div class="cgrid">
+      <div class="rwrap">${radar([[a, CA], [b, CB]])}
+        <div class="lg"><span><i style="background:${CA}"></i>${a.name}</span><span><i style="background:${CB}"></i>${b.name}</span></div>
+        <div class="axn">${A.map(x => `<span><b>${x.n}:</b> ${x.d}</span>`).join("")} · Tüm eksenler bu turnuvadaki 36 takıma göre 0–100.</div></div>
+      <div><table class="ctab"><thead><tr><th style="color:${CA}">${a.name}</th><th></th><th style="color:${CB}">${b.name}</th></tr></thead><tbody>
+        ${rows.map(([n, f, dir, fmt = v => v]) => { const x = f(a), y = f(b), wa = x != null && y != null && dir * (x - y) > 0, wb = x != null && y != null && dir * (y - x) > 0;
+          return `<tr><td class="${wa ? "win" : ""}">${x == null ? "–" : fmt(x)}</td><th>${n}</th><td class="${wb ? "win" : ""}">${y == null ? "–" : fmt(y)}</td></tr>`; }).join("")}
+      </tbody></table>
+      <p class="cm2">${(() => { const d = a.diffRank - b.diffRank;
+        return `${d < 0 ? a.name : b.name}'in fikstürü daha zor (zorluk sırası ${Math.min(a.diffRank, b.diffRank)}. ve ${Math.max(a.diffRank, b.diffRank)}.). Fikstür hesaba katıldığında ${a.succRank < b.succRank ? a.name : b.name} daha başarılı.`; })()}</p></div>
+    </div>
+    <h2 style="margin-top:18px">Fikstürler <small class="sub">· ortak rakipler vurgulu (${common.length})</small></h2>
+    <div class="cfxs"><div>${fx(a)}</div><div>${fx(b)}</div></div>
+  </div>`;
+  $("#ca").onchange = e => { cmpA = +e.target.value; if (cmpA === cmpB) cmpB = null; renderCmp(); };
+  $("#cb").onchange = e => { cmpB = +e.target.value; if (cmpA === cmpB) cmpA = null; renderCmp(); };
+  $("#swap").onclick = () => { [cmpA, cmpB] = [cmpB, cmpA]; renderCmp(); };
+}
+const openCmp = id => { cmpA = id; if (cmpB === id) cmpB = null; setTab("cmp"); scrollTo({ top: document.querySelector(".tabs").offsetTop - 10, behavior: "smooth" }); };
 function render() { bars(); detail(); table(); }
 
 function bars() {
@@ -387,6 +488,7 @@ function bars() {
       ${open ? acc(t) : ""}`;
   }).join("");
   document.querySelectorAll(".row").forEach(r => r.onclick = () => { const id = +r.dataset.id; sel = sel === id ? null : id; render(); });
+  document.querySelectorAll("[data-cmp]").forEach(b => b.onclick = e => { e.stopPropagation(); openCmp(+b.dataset.cmp); });
 }
 const BANDS = [[1, 8], [9, 16], [17, 24], [25, 36]];
 const dist = t => BANDS.map(([a, b]) => t.fixtures.filter(f => { const r = byId[f.opp].rank; return r >= a && r <= b; }).length);
@@ -406,8 +508,8 @@ function acc(t) {
   }).join("");
   return `<div class="acc">
     <div class="accsum">${t.name}: lig sırası <b>${t.rank}.</b> · ${t.pts} puan · ${t.w}G ${t.d}B ${t.l}M ·
-      rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan · kendi fikstüründe <b>${pos}. / ${D.games + 1}</b></div>
-    <div class="bands">${dist(t).map((n, i) => `<span class="band"><small>${BANDS[i][0]}-${BANDS[i][1]}. sıra</small><b>${n}</b></span>`).join("")}</div>
+      rakip maç başı <b>${t.oppPPG.toFixed(2)}</b> puan · kendi fikstüründe <b>${pos}. / ${D.games + 1}</b><button class="cbtn" data-cmp="${t.id}">Karşılaştır →</button></div>
+    <div class="mini">${radar([[t, "var(--acc2)"]], 260)}<div class="bands">${dist(t).map((n, i) => `<span class="band"><small>${BANDS[i][0]}-${BANDS[i][1]}. sıra</small><b>${n}</b></span>`).join("")}</div></div>
     <div style="overflow-x:auto"><table class="acct"><thead><tr><th>Sıra</th><th>Rakip</th><th>Maç</th><th>Sonuç</th><th>Elo</th><th>Puan</th><th>A</th><th>Y</th><th>Av</th></tr></thead>
     <tbody>${fx}</tbody><tfoot><tr><td></td><td>Toplam</td><td></td><td></td><td title="Ortalama">ø ${t.oppElo ?? "–"}</td><td><b>${t.oppPts}</b></td><td class="gf">${t.oppGF}</td><td class="ga">${t.oppGA}</td><td>${sgn(t.oppGD)}</td></tr></tfoot></table></div></div>`;
 }
